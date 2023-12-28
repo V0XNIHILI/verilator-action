@@ -4,7 +4,7 @@ Install Verilator for use in a Github Action workflow.
 
 ## Usage
 
-See [`action.yml`](./action.yaml)
+See [`action.yml`](./action.yaml).
 
 Here's a basic example:
 
