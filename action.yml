@@ -1,4 +1,4 @@
-name: "Verilator action"
+name: "Install Verilator Action"
 description: "Install Verilator for use in a Github Action workflow"
 inputs:
   version:
