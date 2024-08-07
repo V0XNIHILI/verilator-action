@@ -8,7 +8,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    # New step: Caching
+    # Script based on: https://github.com/verilator/verilator/blob/master/docs/guide/install.rst#id3
     - name: Cache Verilator
       id: cache-verilator
       uses: actions/cache@v2
@@ -16,7 +16,6 @@ runs:
         path: ~/verilator
         key: ${{ runner.os }}-verilator-${{ inputs.version }}-${{ hashFiles('**/verilator/**') }}
 
-    # Existing steps...
     - name: Install dependencies
       shell: bash
       run: |
@@ -33,8 +32,8 @@ runs:
       env:
         INPUT_VERSION: ${{ inputs.version }}
       run: |
-        git clone https://github.com/verilator/verilator ~/verilator  # Changed clone directory
-        cd ~/verilator
+        git clone https://github.com/verilator/verilator   # Only first time
+        cd verilator
         git pull         # Make sure git repository is up-to-date
         git checkout $INPUT_VERSION
 
@@ -43,7 +42,7 @@ runs:
       if: steps.cache-verilator.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        cd ~/verilator
+        cd verilator
         autoconf         # Create ./configure script
         ./configure      # Configure and create Makefile
         make -j `nproc`  # Build Verilator itself (if error, try just 'make')
