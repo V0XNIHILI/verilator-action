@@ -50,5 +50,5 @@ runs:
       if: steps.cache-verilator.outputs.cache-hit == 'true'
       shell: bash
       run: |
-        cd ~/verilator
+        cd verilator
         sudo make install
