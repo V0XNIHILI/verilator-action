@@ -25,7 +25,6 @@ runs:
         sudo apt-get install libfl-dev  # Ubuntu only (ignore if gives error)
         # sudo apt-get install zlibc zlib1g zlib1g-dev  # Ubuntu only (ignore if gives error); skipping because it leads to 'Unable to locate package zlibc' error
 
-    # Modified step: Checkout Verilator
     - name: Checkout Verilator
       if: steps.cache-verilator.outputs.cache-hit != 'true'
       shell: bash
@@ -37,7 +36,6 @@ runs:
         git pull         # Make sure git repository is up-to-date
         git checkout $INPUT_VERSION
 
-    # Modified step: Build Verilator
     - name: Build Verilator
       if: steps.cache-verilator.outputs.cache-hit != 'true'
       shell: bash
@@ -48,7 +46,6 @@ runs:
         make -j `nproc`  # Build Verilator itself (if error, try just 'make')
         sudo make install
 
-    # New step: Use cached Verilator
     - name: Use cached Verilator
       if: steps.cache-verilator.outputs.cache-hit == 'true'
       shell: bash
