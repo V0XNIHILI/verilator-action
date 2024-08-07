@@ -11,7 +11,7 @@ runs:
     # Script based on: https://github.com/verilator/verilator/blob/master/docs/guide/install.rst#id3
     - name: Cache Verilator
       id: cache-verilator
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/verilator
         key: ${{ runner.os }}-verilator-${{ inputs.version }}-${{ hashFiles('**/verilator/**') }}
@@ -45,6 +45,13 @@ runs:
         ./configure      # Configure and create Makefile
         make -j `nproc`  # Build Verilator itself (if error, try just 'make')
         sudo make install
+
+    - name: Save Verilator to cache
+      if: steps.cache-verilator.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: ~/verilator
+        key: ${{ runner.os }}-verilator-${{ inputs.version }}-${{ hashFiles('**/verilator/**') }}
 
     - name: Use cached Verilator
       if: steps.cache-verilator.outputs.cache-hit == 'true'
