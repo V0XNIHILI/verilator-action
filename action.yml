@@ -9,6 +9,13 @@ runs:
   using: 'composite'
   steps:
     # Script based on: https://github.com/verilator/verilator/blob/master/docs/guide/install.rst#id3
+    - name: Cache Verilator
+      id: cache-verilator
+      uses: actions/cache@v3
+      with:
+        path: ~/verilator
+        key: ${{ runner.os }}-verilator-${{ inputs.version }}-${{ hashFiles('**/verilator/**') }}
+
     - name: Install dependencies
       shell: bash
       run: |
@@ -17,20 +24,38 @@ runs:
         sudo apt-get install libfl2  # Ubuntu only (ignore if gives error)
         sudo apt-get install libfl-dev  # Ubuntu only (ignore if gives error)
         # sudo apt-get install zlibc zlib1g zlib1g-dev  # Ubuntu only (ignore if gives error); skipping because it leads to 'Unable to locate package zlibc' error
+
     - name: Checkout Verilator
+      if: steps.cache-verilator.outputs.cache-hit != 'true'
       shell: bash
       env:
         INPUT_VERSION: ${{ inputs.version }}
       run: |
-        git clone https://github.com/verilator/verilator   # Only first time
-        cd verilator
+        git clone https://github.com/verilator/verilator  ~/verilator # Only first time, we use home to avoid conflict with current repo
+        cd ~/verilator
         git pull         # Make sure git repository is up-to-date
         git checkout $INPUT_VERSION
+
     - name: Build Verilator
+      if: steps.cache-verilator.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        cd verilator
+        cd ~/verilator
         autoconf         # Create ./configure script
         ./configure      # Configure and create Makefile
         make -j `nproc`  # Build Verilator itself (if error, try just 'make')
+        sudo make install
+
+    - name: Save Verilator to cache
+      if: steps.cache-verilator.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: ~/verilator
+        key: ${{ runner.os }}-verilator-${{ inputs.version }}-${{ hashFiles('**/verilator/**') }}
+
+    - name: Use cached Verilator
+      if: steps.cache-verilator.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        cd ~/verilator
         sudo make install
